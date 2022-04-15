@@ -15,7 +15,20 @@ jobs:
         with:
           distribution: temurin
           java-version: 8
-      - name: Run maven tests
-        run: mvn --batch-mode --no-transfer-progress clean test
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Get version
+        id: version
+        run: echo "dsl_version=0.52" >> $GITHUB_ENV
+      - name: Deploy github pages
+        run: .github/vuepress-deploy.sh
         env:
-          BZ_TOKEN: ${{ secrets.BZ_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          repository: abstracta/jmeter-java-dsl-sample
+          path: jmeter-java-dsl-sample
+          token: ${{ secrets.ACTIONS_TOKEN }}
+      - name: update version in sample project
+        run: .github/update-sample-version.sh ${{ env.dsl_version }}
